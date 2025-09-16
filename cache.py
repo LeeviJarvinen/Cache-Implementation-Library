@@ -2,8 +2,10 @@ class BaseCache:
     def __init__(self, max_size: int):
         if not isinstance(max_size, int):
             raise TypeError("max_size must be an integer")
+
         if max_size < 0:
             raise ValueError("max_size cannot be negative")
+
         self.max_size = max_size
         self.cache = {}
         self._setup_strategy()
