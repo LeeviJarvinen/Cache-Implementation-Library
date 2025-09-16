@@ -1,5 +1,9 @@
 class BaseCache:
     def __init__(self, max_size: int):
+        if not isinstance(max_size, int):
+            raise TypeError("max_size must be an integer")
+        if max_size < 0:
+            raise ValueError("max_size cannot be negative")
         self.max_size = max_size
         self.cache = {}
         self._setup_strategy()
@@ -21,6 +25,9 @@ class BaseCache:
         if key not in self.cache:
             self._on_new_key(key)
 
+        if key in self.cache:
+            self._on_access(key)
+
         self.cache[key] = value
 
 
@@ -30,20 +37,29 @@ class BaseCache:
     def _get_eviction_key(self): pass
     #def _on_eviction(self, key): pass
 
-
 class LRUCache(BaseCache):
     def _setup_strategy(self):
         self.order = []    
-
 
     def _on_access(self, key):
         self.order.remove(key)
         self.order.insert(0, key)
 
-
     def _on_new_key(self, key):
         self.order.insert(0, key)
 
-
     def _get_eviction_key(self):
         return self.order.pop()
+
+class FIFOCache(BaseCache):
+    def _setup_strategy(self):
+        self.insertion_order = []
+
+    def _on_access(self, key):
+        pass
+
+    def _on_new_key(self, key):
+        self.insertion_order.append(key)
+
+    def _get_eviction_key(self):
+        return self.insertion_order.pop(0)
