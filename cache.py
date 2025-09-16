@@ -1,39 +1,49 @@
-class Cache:
-    def __init__(self, max_size: int, strategy = "rand"):
-
-        if not isinstance(max_size, int):
-            raise TypeError("type of max_size must be an integer")
-        self.strategy = strategy
+class BaseCache:
+    def __init__(self, max_size: int):
         self.max_size = max_size
         self.cache = {}
+        self._setup_strategy()
 
-        if strategy == "lru":
-            pass
+
+    def get(self, key):
+        if key in self.cache:
+            self._on_access(key)
+            return self.cache[key]
+
+        return None
+
 
     def set(self, key, value):
-        if len(self.cache) + 1 > self.max_size and key not in self.cache:
-            self._evict()
+        if len(self.cache) > self.max_size and key not in self.cache:
+            key_to_evict = self._get_eviction_key()
+            del self.cache[key_to_evict]
+
+        if key not in self.cache:
+            self._on_new_key(key)
+
         self.cache[key] = value
 
-    def get(self, key, default = None):
-        return self.cache.get(key, default)
 
-    def _evict(self):
-        match self.strategy:
-            case "rand":
-                self._evict_random()
-            case "lru":
-                pass
-            case "fifo":
-                pass
-            case _:
-                pass
+    def _setup_strategy(self): pass
+    def _on_access(self, key): pass
+    def _on_new_key(self, key): pass
+    def _get_eviction_key(self): pass
+    #def _on_eviction(self, key): pass
 
-    def _evict_random(self):
-        import random
-        random_key = random.choice(list(self.cache.keys()))
-        del self.cache[random_key]
 
-    def print_cache(self):
-        return self.cache
+class LRUCache(BaseCache):
+    def _setup_strategy(self):
+        self.order = []    
 
+
+    def _on_access(self, key):
+        self.order.remove(key)
+        self.order.insert(0, key)
+
+
+    def _on_new_key(self, key):
+        self.order.insert(0, key)
+
+
+    def _get_eviction_key(self):
+        return self.order.pop()
