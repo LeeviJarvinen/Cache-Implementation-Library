@@ -53,6 +53,21 @@ class LRUCache(BaseCache):
     def _get_eviction_key(self):
         return self.order.pop()
 
+class LFUCache(BaseCache):
+    def _setup_strategy(self):
+        self.frequency = {}
+
+    def _on_access(self, key):
+        self.frequency[key] += 1
+
+    def _on_new_key(self, key):
+        self.frequency[key] = 0
+
+    def _get_eviction_key(self):
+        least_frequent = min(self.frequency, key=self.frequency.get)
+        self.frequency.pop(least_frequent)
+        return least_frequent 
+
 class FIFOCache(BaseCache):
     def _setup_strategy(self):
         self.insertion_order = []
