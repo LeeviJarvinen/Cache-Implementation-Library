@@ -62,13 +62,16 @@ class BaseCache:
         return None
 
 
-    def set(self, key, value):
+    def set(self, key, value, ttl=None):
+        if isinstance(key, None)
+            raise TypeError("key cannot be None")
+
         if len(self.cache) > self.max_size and key not in self.cache:
             key_to_evict = self._get_eviction_key()
             del self.cache[key_to_evict]
 
         if key not in self.cache:
-            self._on_new_key(key)
+            self._on_new_key(key, ttl)
 
         if key in self.cache:
             self._on_access(key)
@@ -77,7 +80,7 @@ class BaseCache:
 
     def _setup_strategy(self): pass
     def _on_access(self, key): pass
-    def _on_new_key(self, key): pass
+    def _on_new_key(self, key, ttl=None): pass
     def _get_eviction_key(self): pass
     #def _on_eviction(self, key): pass
 
@@ -90,7 +93,7 @@ class LRUCache(BaseCache):
     def _on_access(self, key):
         self.dll.move_to_front(self.nodemap[key])
 
-    def _on_new_key(self, key):
+    def _on_new_key(self, key, ttl = None):
         node = self.dll.add_to_front(key)
         self.nodemap[key] = node
 
@@ -128,13 +131,15 @@ class FIFOCache(BaseCache):
         return self.insertion_order.pop(0)
 
 class TTLCache(BaseCache):
-    def _setup_strategy(self):
-        pass
+
+    def _setup_strategy(self, default_ttl = None):
+        self.default_ttl = default_ttl
+        self.expiry_times = {}
 
     def _on_access(self, key):
         pass
 
-    def _on_new_key(self, key):
+    def _on_new_key(self, key, ttl):
         pass
 
     def _get_eviction_key(self):
