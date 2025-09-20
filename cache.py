@@ -126,3 +126,16 @@ class FIFOCache(BaseCache):
 
     def _get_eviction_key(self):
         return self.insertion_order.pop(0)
+
+class TTLCache(BaseCache):
+    def _setup_strategy(self):
+        pass
+
+    def _on_access(self, key):
+        pass
+
+    def _on_new_key(self, key):
+        pass
+
+    def _get_eviction_key(self):
+        pass
