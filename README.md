@@ -44,13 +44,47 @@ cache.set("second", "value2")
 # "first" will be evicted before "second"
 ```
 
-### TTL Cache (Time To Live) (WIP)
+### TTL Cache (Time To Live)
+Evicts items after a specified time period expires. Combines time-based expiration with LRU-style capacity management. When items expire, they are automatically removed on access. When the cache reaches capacity, the least recently used non-expired item is evicted.
 
-Designed to support time-based expiration of cache entries, where items are evicted after a specified time period.
+**Key Features:**
+- **Time-based expiration**: Items automatically expire after their TTL
+- **Flexible TTL**: Set per-item TTL or use a default for the entire cache
+- **Capacity management**: Uses LRU eviction when at capacity
+- **Lazy cleanup**: Expired items are removed when accessed
+
+```python
+# Create with default TTL
+cache = TTLCache(max_size=100, default_ttl=300)  # 5 minute default
+cache.set("session:123", user_data)  # Uses default TTL
+
+# Override TTL for specific items
+cache.set("temp:data", temp_value, ttl=60)  # Expires in 1 minute
+
+# Items expire automatically
+time.sleep(61)
+result = cache.get("temp:data")  # Returns None, item expired
+```
 
 ## Usage
 
-...
+All cache implementations share the same basic interface:
+
+```python
+# Initialize with maximum size
+cache = LRUCache(max_size=50)
+
+# Store values
+cache.set("user:123", {"name": "John", "age": 30})
+
+# Retrieve values
+user_data = cache.get("user:123")
+if user_data is None:
+    # Cache miss - fetch from original source
+    pass
+
+# Automatic eviction when capacity is exceeded
+```
 
 ## Features
 
@@ -64,3 +98,4 @@ Designed to support time-based expiration of cache entries, where items are evic
 - Raises `TypeError` for invalid `max_size` types
 - Raises `ValueError` for negative `max_size` values
 - Raises `TypeError` for `None` keys during `set()` operations
+- **TTL Cache specific**: Raises `TypeError` if no TTL is provided (either per-item or default)
