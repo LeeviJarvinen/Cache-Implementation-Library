@@ -1,4 +1,5 @@
 import time
+from abc import abstractmethod, ABC
 
 class DoublyLinkedList:
     class _Node:
@@ -47,8 +48,10 @@ class DoublyLinkedList:
         if self.head.next == self.tail:
             return None
         self._remove_node(node)
+       
 
-class BaseCache:
+@abstractmethod
+class BaseCache(ABC):
     def __init__(self, max_size: int):
         if not isinstance(max_size, int):
             raise TypeError("max_size must be an integer")
@@ -83,12 +86,14 @@ class BaseCache:
             self._on_access(key)
 
         self.cache[key] = value
-
+    @abstractmethod
     def _setup_strategy(self): pass
+    @abstractmethod
     def _on_access(self, key): pass
+    @abstractmethod
     def _on_new_key(self, key): pass
+    @abstractmethod
     def _get_eviction_key(self): pass
-    #def _on_eviction(self, key): pass
 
 
 class LRUCache(BaseCache):
